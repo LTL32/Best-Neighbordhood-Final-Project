@@ -1,1 +1,74 @@
+List Of Neighboorhoods
 
+import pandas as pd
+neighborhoods = pd.read_csv("Neighboorhoods.csv")
+
+neighborhood_list = sorted(
+    neighborhoods["hood"].dropna().str.strip().unique()
+)
+
+print(neighborhood_list)
+
+Number of crimes commited in each neighboorhood since 2024
+
+crimes = pd.read_csv("CrimeRate.csv", low_memory=False)
+crimes["Neighborhood"] = crimes["Neighborhood"].str.strip()
+
+crime_counts = []
+for hood in neighborhood_list:
+    count = (crimes["Neighborhood"] == hood).sum()
+    crime_counts.append((hood, count))
+
+crime_count_list = pd.DataFrame(
+    crime_counts,
+    columns=["Neighborhood", "Crime_Count"]
+)
+
+Amount of playgrounds in each neighboorhood
+
+playgrounds = pd.read_csv("Playground Equipment.csv", low_memory=False)
+playgrounds["neighborhood"] = playgrounds["neighborhood"].str.strip()
+
+playground_counts = []
+for hood in neighborhood_list:
+    count = (playgrounds["neighborhood"] == hood).sum()
+    playground_counts.append((hood, count))
+
+playgrounds_counts_list = pd.DataFrame(
+    playground_counts,
+    columns=["Neighborhood", "Playground_Count"]
+)
+
+Fires per neighborhood since 2013
+
+fires = pd.read_csv("Fires.csv", low_memory=False)
+fires["neighborhood"] = fires["neighborhood"].str.strip()
+
+fire_counts = []
+for hood in neighborhood_list:
+    count = (fires["neighborhood"] == hood).sum()
+    fire_counts.append((hood, count))
+
+fires_counts_list = pd.DataFrame(
+    fire_counts,
+    columns=["Neighborhood", "Fire_Count"]
+)
+
+Creating a finals metric
+
+merged["Crime_N"] = merged["Crime_Count"] / merged["Crime_Count"].max()
+merged["Fire_N"] = merged["Fire_Count"] / merged["Fire_Count"].max()
+merged["Play_N"] = merged["Playground_Count"] / merged["Playground_Count"].max()
+
+merged["Metric"] = (
+    merged["Crime_N"] * 1 +
+    merged["Fire_N"] * 2 +
+    merged["Play_N"] * 1
+)
+
+print(merged.sort_values("Metric"))
+
+5 safests neighboorhoods
+
+for _, row in merged.sort_values("Metric").head(5).iterrows():
+    print(row["Neighborhood"], "-", round(row["Metric"], 4))
